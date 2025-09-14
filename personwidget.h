@@ -19,6 +19,7 @@ public:
 
 private slots:
     void addPerson();
+    void deletePerson();
 
 private:
     void setupDatabase();
