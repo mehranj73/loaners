@@ -10,6 +10,30 @@
 
 LoansWidgets::LoansWidgets(QWidget *parent) : QWidget(parent), ui(new Ui::LoansWidgets) {
     ui->setupUi(this);
+
+    // No need to redeclare, just use ui->tableWidget
+    ui->tableWidget->setRowCount(3);
+    ui->tableWidget->setColumnCount(3);
+    ui->tableWidget->setWindowTitle("QTableWidget Example");
+
+    // Set headers
+    QStringList headers = {"Name", "Age", "Country"};
+    ui->tableWidget->setHorizontalHeaderLabels(headers);
+
+    // Add data
+    ui->tableWidget->setItem(0, 0, new QTableWidgetItem("Alice"));
+    ui->tableWidget->setItem(0, 1, new QTableWidgetItem("25"));
+    ui->tableWidget->setItem(0, 2, new QTableWidgetItem("USA"));
+
+    ui->tableWidget->setItem(1, 0, new QTableWidgetItem("Bob"));
+    ui->tableWidget->setItem(1, 1, new QTableWidgetItem("30"));
+    ui->tableWidget->setItem(1, 2, new QTableWidgetItem("UK"));
+
+    ui->tableWidget->setItem(2, 0, new QTableWidgetItem("Charlie"));
+    ui->tableWidget->setItem(2, 1, new QTableWidgetItem("22"));
+    ui->tableWidget->setItem(2, 2, new QTableWidgetItem("Canada"));
+
+
 }
 
 LoansWidgets::~LoansWidgets() {

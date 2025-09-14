@@ -1,19 +1,13 @@
-//
-// Created by Mehranj73 on 9/11/2025.
-//
-
-#ifndef LOANERS_PERSONWIDGET_H
-#define LOANERS_PERSONWIDGET_H
+#ifndef PERSONWIDGET_H
+#define PERSONWIDGET_H
 
 #include <QWidget>
-
+#include <QSqlDatabase>
+#include <QSqlTableModel>
+#include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
-
-namespace Ui {
-    class PersonWidget;
-}
-
+namespace Ui { class PersonWidget; }
 QT_END_NAMESPACE
 
 class PersonWidget : public QWidget {
@@ -21,12 +15,18 @@ class PersonWidget : public QWidget {
 
 public:
     explicit PersonWidget(QWidget *parent = nullptr);
+    ~PersonWidget();
 
-    ~PersonWidget() override;
+private slots:
+    void addPerson();
 
 private:
+    void setupDatabase();
+
     Ui::PersonWidget *ui;
+    QSqlDatabase db;
+    QSqlTableModel *model;
+    QSortFilterProxyModel *proxyModel;
 };
 
-
-#endif //LOANERS_PERSONWIDGET_H
+#endif // PERSONWIDGET_H

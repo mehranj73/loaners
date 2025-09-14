@@ -1,18 +1,13 @@
-//
-// Created by Mehranj73 on 9/11/2025.
-//
-
-// You may need to build the project (run Qt uic code generator) to get "ui_Mainwindow.h" resolved
-
-#include "mainwindow.h"
-#include "ui_Mainwindow.h"
 #include "loanswidgets.h"
+#include "MainWindow.h"
 #include "personwidget.h"
+#include "ui_MainWindow.h"
 
 
-Mainwindow::Mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::Mainwindow) {
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow) 
+{
     ui->setupUi(this);
-
 
     PersonWidget* person = new PersonWidget(this);
     LoansWidgets* loans = new LoansWidgets(this);
@@ -23,6 +18,6 @@ Mainwindow::Mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::Mainwi
     ui->tabWidget->addTab(loans, "لیست تسهیلات");
 }
 
-Mainwindow::~Mainwindow() {
+MainWindow::~MainWindow() {
     delete ui;
 }
