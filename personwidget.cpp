@@ -9,6 +9,38 @@
 #include <QComboBox>
 #include <QRegularExpression>
 
+
+
+#include <QProxyStyle>
+#include <QStyleOption>
+#include <QLineEdit>
+#include <QPainter>
+
+
+
+#include <QLineEdit>
+#include <QFocusEvent>
+
+
+
+class RtlLineEditStyle : public QProxyStyle {
+public:
+    using QProxyStyle::QProxyStyle;
+
+    void drawItemText(QPainter *painter, const QRect &rect, int flags,
+                      const QPalette &pal, bool enabled,
+                      const QString &text, QPalette::ColorRole role) const override {
+        if (flags & Qt::AlignLeft && text.isEmpty()) {
+            QProxyStyle::drawItemText(painter, rect, Qt::AlignRight | Qt::AlignVCenter,
+                                      pal, enabled, text, role);
+        } else {
+            QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, role);
+        }
+    }
+};
+
+
+
 // Combo delegate for score column
 class ComboBoxDelegate : public QStyledItemDelegate {
 public:
@@ -50,7 +82,10 @@ PersonWidget::PersonWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::PersonWidget), model(nullptr), proxyModel(nullptr)
 {
     ui->setupUi(this);
+    ui->gridLayout->setHorizontalSpacing(10);
+    ui->gridLayout->setVerticalSpacing(15);
     setupDatabase();
+
 
     // --- Model ---
     model = new QSqlTableModel(this, db);

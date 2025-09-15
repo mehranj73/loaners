@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>763</width>
-    <height>636</height>
+    <width>850</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,22 +15,54 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
+    <layout class="QGridLayout" name="gridLayout">
+     <property name="spacing">
+      <number>15</number>
+     </property>
      <item row="0" column="0">
-      <widget class="QLineEdit" name="nameEdit">
+      <widget class="RtlLineEdit" name="nameEdit">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::LayoutDirection::LeftToRight</enum>
        </property>
        <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
        <property name="placeholderText">
         <string>نام را وارد کنید</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="0" column="1">
+      <widget class="QLabel" name="nameLabel">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>نام:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
       <widget class="QLineEdit" name="ssnEdit">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::LayoutDirection::RightToLeft</enum>
        </property>
@@ -42,8 +74,67 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="1" column="1">
+      <widget class="QLabel" name="ssnLabel">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>شماره ملی:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLineEdit" name="jobEdit">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LayoutDirection::RightToLeft</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>شغل را وارد کنید</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="jobLabel">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>شغل:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
       <widget class="QComboBox" name="scoreCombo">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::LayoutDirection::RightToLeft</enum>
        </property>
@@ -129,65 +220,61 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="nameLabel">
-       <property name="text">
-        <string>نام:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
+     <item row="3" column="1">
       <widget class="QLabel" name="scoreLabel">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>نمره:</string>
        </property>
-      </widget>
-     </item>
-     <item row="5" column="2">
-      <widget class="QLabel" name="jobLabel">
-       <property name="text">
-        <string>شغل:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QLabel" name="ssnLabel">
-       <property name="text">
-        <string>شماره ملی:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLineEdit" name="jobEdit">
-       <property name="layoutDirection">
-        <enum>Qt::LayoutDirection::RightToLeft</enum>
-       </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-       </property>
-       <property name="placeholderText">
-        <string>شغل را وارد کنید</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="deleteButton">
-     <property name="text">
-      <string>حذف</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QPushButton" name="addButton">
+     <property name="font">
+      <font>
+       <family>B Nazanin</family>
+       <pointsize>12</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>افزودن</string>
      </property>
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="deleteButton">
+     <property name="font">
+      <font>
+       <family>B Nazanin</family>
+       <pointsize>12</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>حذف</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLineEdit" name="searchEdit">
+     <property name="font">
+      <font>
+       <family>B Nazanin</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
      <property name="layoutDirection">
       <enum>Qt::LayoutDirection::RightToLeft</enum>
      </property>
@@ -197,10 +284,36 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableView" name="tableView"/>
+    <widget class="QTableView" name="tableView">
+     <property name="font">
+      <font>
+       <family>B Nazanin</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RtlLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>rtllineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
