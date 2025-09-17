@@ -25,8 +25,7 @@ add_executable(loaners main.cpp
         personwidget.cpp
         personwidget.h
         personwidget.ui
-        rtllineedit.cpp
-        rtllineedit.h)
+)
 
 
 target_link_libraries(loaners

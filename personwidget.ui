@@ -19,8 +19,33 @@
      <property name="spacing">
       <number>15</number>
      </property>
-     <item row="0" column="0">
-      <widget class="RtlLineEdit" name="nameEdit">
+     <item row="3" column="2">
+      <widget class="QLineEdit" name="jobEdit">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LayoutDirection::RightToLeft</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>شغل را وارد کنید</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLineEdit" name="nameEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="font">
         <font>
          <family>B Nazanin</family>
@@ -39,42 +64,6 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLabel" name="nameLabel">
-       <property name="font">
-        <font>
-         <family>B Nazanin</family>
-         <pointsize>12</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>نام:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLineEdit" name="ssnEdit">
-       <property name="font">
-        <font>
-         <family>B Nazanin</family>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LayoutDirection::RightToLeft</enum>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-       </property>
-       <property name="placeholderText">
-        <string>شماره ملی را وارد کنید</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
       <widget class="QLabel" name="ssnLabel">
        <property name="font">
         <font>
@@ -91,26 +80,24 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLineEdit" name="jobEdit">
+     <item row="0" column="3">
+      <widget class="QLabel" name="nameLabel">
        <property name="font">
         <font>
          <family>B Nazanin</family>
          <pointsize>12</pointsize>
+         <bold>true</bold>
         </font>
        </property>
-       <property name="layoutDirection">
-        <enum>Qt::LayoutDirection::RightToLeft</enum>
+       <property name="text">
+        <string>نام:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
-       <property name="placeholderText">
-        <string>شغل را وارد کنید</string>
-       </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="3" column="3">
       <widget class="QLabel" name="jobLabel">
        <property name="font">
         <font>
@@ -121,6 +108,42 @@
        </property>
        <property name="text">
         <string>شغل:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLineEdit" name="ssnEdit">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LayoutDirection::LeftToRight</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>شماره ملی را وارد کنید</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="scoreLabel">
+       <property name="font">
+        <font>
+         <family>B Nazanin</family>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>نمره:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -220,23 +243,6 @@
        </item>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="scoreLabel">
-       <property name="font">
-        <font>
-         <family>B Nazanin</family>
-         <pointsize>12</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>نمره:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -307,13 +313,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>RtlLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>rtllineedit.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
