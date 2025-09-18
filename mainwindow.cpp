@@ -13,45 +13,50 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    // Create a shared SQLite connection with a named connection
-    const QString connName = "loaners_conn";
-    if (!QSqlDatabase::contains(connName)) {
-        db = QSqlDatabase::addDatabase("QSQLITE", connName);
-        db.setDatabaseName("loaners.db");
+    // Ensure a default shared SQLite DB (people.db) exists and has required tables.
+    QSqlDatabase db;
+    const QString defaultConn = QSqlDatabase::defaultConnection;
+    if (QSqlDatabase::contains(defaultConn)) {
+        db = QSqlDatabase::database(defaultConn);
     } else {
-        db = QSqlDatabase::database(connName);
+        db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName("people.db");
     }
 
     if (!db.open()) {
-        QMessageBox::critical(this, "Database error", db.lastError().text());
-        return;
+        QMessageBox::critical(this, "خطای پایگاه داده", db.lastError().text());
+        // still continue; widgets will show errors if DB unavailable
+    } else {
+        QSqlQuery q(db);
+        // persons table (if not exists)
+        q.exec(R"(
+            CREATE TABLE IF NOT EXISTS persons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                ssn TEXT,
+                job TEXT,
+                score INTEGER
+            )
+        )");
+        // loans table with borrower and guarantor referencing persons
+        q.exec(R"(
+            CREATE TABLE IF NOT EXISTS loans (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                borrower_id INTEGER NOT NULL,
+                guarantor_id INTEGER,
+                amount REAL NOT NULL,
+                percentage REAL DEFAULT 0,
+                date TEXT,
+                description TEXT,
+                FOREIGN KEY(borrower_id) REFERENCES persons(id),
+                FOREIGN KEY(guarantor_id) REFERENCES persons(id)
+            )
+        )");
     }
 
-    // Ensure required tables exist
-    QSqlQuery q(db);
-    if (!q.exec(R"(CREATE TABLE IF NOT EXISTS persons (
-                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                      name TEXT NOT NULL,
-                      ssn TEXT,
-                      job TEXT,
-                      score INTEGER
-                  ))")) {
-        QMessageBox::warning(this, "DB warning", q.lastError().text());
-    }
-    if (!q.exec(R"(CREATE TABLE IF NOT EXISTS loans (
-                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                      person_id INTEGER,
-                      amount REAL,
-                      description TEXT,
-                      date TEXT,
-                      FOREIGN KEY(person_id) REFERENCES persons(id)
-                  ))")) {
-        QMessageBox::warning(this, "DB warning", q.lastError().text());
-    }
-
-    // Pass the connection name to child widgets so they use the same QSqlDatabase
-    PersonWidget* person = new PersonWidget(this, connName);
-    LoansWidgets* loans = new LoansWidgets(this, connName);
+    // Create widgets (they will use the default DB connection)
+    PersonWidget* person = new PersonWidget(this);
+    LoansWidgets* loans = new LoansWidgets(this);
 
     // Add widgets to the tab widget
     ui->tabWidget->addTab(person, "اشخاص");

@@ -76,18 +76,13 @@ private:
 
 // --- PersonWidget Implementation ---
 
-PersonWidget::PersonWidget(QWidget *parent, const QString &connectionName)
+PersonWidget::PersonWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::PersonWidget), model(nullptr), proxyModel(nullptr)
 {
     ui->setupUi(this);
     ui->gridLayout->setHorizontalSpacing(10);
     ui->gridLayout->setVerticalSpacing(15);
-    // Use existing database connection provided by MainWindow
-    if (!connectionName.isEmpty() && QSqlDatabase::contains(connectionName)) {
-        db = QSqlDatabase::database(connectionName);
-    } else {
-        db = QSqlDatabase::database();
-    }
+    setupDatabase();
 
     ui->tableView->setItemDelegate(new PaddingDelegate(5, 2, 5, 2, this));
 
@@ -168,7 +163,35 @@ PersonWidget::PersonWidget(QWidget *parent, const QString &connectionName)
 
 PersonWidget::~PersonWidget() { delete ui; }
 
+void PersonWidget::setupDatabase()
+{
+    // Use existing default connection if present, otherwise create the default SQLite DB
+    const QString defaultConn = QSqlDatabase::defaultConnection;
+    if (QSqlDatabase::contains(defaultConn)) {
+        db = QSqlDatabase::database(defaultConn);
+    } else {
+        db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName("people.db");
+    }
 
+    if (!db.isOpen()) {
+        if (!db.open()) {
+            QMessageBox::critical(this, "خطای پایگاه داده", db.lastError().text());
+            return;
+        }
+    }
+
+    QSqlQuery query(db);
+    if (!query.exec("CREATE TABLE IF NOT EXISTS persons ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "name TEXT NOT NULL,"
+                    "ssn TEXT NOT NULL UNIQUE,"
+                    "job TEXT,"
+                    "score TEXT NULL)"))
+    {
+        QMessageBox::critical(this, "خطای ایجاد جدول", query.lastError().text());
+    }
+}
 
 void PersonWidget::addPerson()
 {

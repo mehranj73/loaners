@@ -14,7 +14,7 @@ class PersonWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit PersonWidget(QWidget *parent = nullptr, const QString &connectionName = QString());
+    explicit PersonWidget(QWidget *parent = nullptr);
     ~PersonWidget();
 
 private slots:
@@ -22,7 +22,8 @@ private slots:
     void deletePerson();
 
 private:
-    // removed setupDatabase - main window manages DB creation
+    void setupDatabase();
+
     Ui::PersonWidget *ui;
     QSqlDatabase db;
     QSqlTableModel *model;
