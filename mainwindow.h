@@ -1,5 +1,6 @@
 #pragma once
 #include <QMainWindow>
+#include <QSqlDatabase>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -12,4 +13,5 @@ public:
     ~MainWindow();
 private:
     Ui::MainWindow* ui;
+    QSqlDatabase db; // shared database connection
 };

@@ -18,6 +18,13 @@ QT_END_NAMESPACE
 
 class LoansWidgets : public QWidget {
     Q_OBJECT
+public:
+    explicit LoansWidgets(QWidget *parent = nullptr, const QString &connectionName = QString());
+    ~LoansWidgets();
+private:
+    Ui::LoansWidgets *ui;
+    QSqlDatabase db;
+    Q_OBJECT
 
 public:
     explicit LoansWidgets(QWidget *parent = nullptr);

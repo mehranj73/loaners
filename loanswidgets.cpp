@@ -8,7 +8,13 @@
 #include "ui_LoansWidgets.h"
 
 
-LoansWidgets::LoansWidgets(QWidget *parent) : QWidget(parent), ui(new Ui::LoansWidgets) {
+LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) : QWidget(parent), ui(new Ui::LoansWidgets) {
+    // use provided DB connection name if available
+    if (!connectionName.isEmpty() && QSqlDatabase::contains(connectionName)) {
+        db = QSqlDatabase::database(connectionName);
+    } else {
+        db = QSqlDatabase::database();
+    }
     ui->setupUi(this);
 
     // No need to redeclare, just use ui->tableWidget
