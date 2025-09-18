@@ -23,22 +23,20 @@
 
 
 
-class RtlLineEditStyle : public QProxyStyle {
+class PaddingDelegate : public QStyledItemDelegate {
 public:
-    using QProxyStyle::QProxyStyle;
+    PaddingDelegate(int left, int top, int right, int bottom, QObject *parent = nullptr)
+        : QStyledItemDelegate(parent), m_left(left), m_top(top), m_right(right), m_bottom(bottom) {}
 
-    void drawItemText(QPainter *painter, const QRect &rect, int flags,
-                      const QPalette &pal, bool enabled,
-                      const QString &text, QPalette::ColorRole role) const override {
-        if (flags & Qt::AlignLeft && text.isEmpty()) {
-            QProxyStyle::drawItemText(painter, rect, Qt::AlignRight | Qt::AlignVCenter,
-                                      pal, enabled, text, role);
-        } else {
-            QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, role);
-        }
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        QStyleOptionViewItem opt = option;
+        opt.rect.adjust(m_left, m_top, -m_right, -m_bottom); // shrink rect for padding
+        QStyledItemDelegate::paint(painter, opt, index);
     }
-};
 
+private:
+    int m_left, m_top, m_right, m_bottom;
+};
 
 
 // Combo delegate for score column
@@ -86,6 +84,7 @@ PersonWidget::PersonWidget(QWidget *parent)
     ui->gridLayout->setVerticalSpacing(15);
     setupDatabase();
 
+    ui->tableView->setItemDelegate(new PaddingDelegate(5, 2, 5, 2, this));
 
     // --- Model ---
     model = new QSqlTableModel(this, db);
@@ -103,6 +102,8 @@ PersonWidget::PersonWidget(QWidget *parent)
 
 
     ui->tableView->setLayoutDirection(Qt::RightToLeft);
+
+
     ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
     ui->tableView->verticalHeader()->setVisible(false); // hide row numbers if desired
 

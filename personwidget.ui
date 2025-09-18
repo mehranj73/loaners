@@ -168,6 +168,11 @@
        </item>
        <item>
         <property name="text">
+         <string>بدون رتبه ی اعتباری</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>A1</string>
         </property>
        </item>
