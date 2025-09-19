@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QSqlDatabase>
 #include <QSqlTableModel>
-#include <QSqlRelationalTableModel>
+#include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
 
 namespace Ui {
@@ -35,12 +35,14 @@ private:
     QSortFilterProxyModel *borrowerProxy;
     QSortFilterProxyModel *guarantorProxy;
 
-    QSqlRelationalTableModel *loanModel;
-    QSortFilterProxyModel *loanProxy; // for loan search
+    QSqlQueryModel *loanModel;
+    QSortFilterProxyModel *loanProxy;
 
-    // Selected IDs
+    // Selection
     int selectedBorrowerId;
-    int selectedGuarantorId;
+    QList<int> selectedGuarantorIds;
+
+    void loadLoans(); // Refresh loan table
 };
 
 #endif // LOANSWIDGETS_H
