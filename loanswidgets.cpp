@@ -21,7 +21,7 @@ LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     ui->setupUi(this);
     this->setLayoutDirection(Qt::RightToLeft);
 
-    // Database
+    // Database connection
     if (!connectionName.isEmpty() && QSqlDatabase::contains(connectionName))
         db = QSqlDatabase::database(connectionName);
     else
@@ -35,7 +35,7 @@ LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     borrowerProxy = new QSortFilterProxyModel(this);
     borrowerProxy->setSourceModel(borrowerModel);
     borrowerProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    borrowerProxy->setFilterKeyColumn(1); // Name column
+    borrowerProxy->setFilterKeyColumn(1);
 
     ui->borrowerTable->setModel(borrowerProxy);
     ui->borrowerTable->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -43,8 +43,7 @@ LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     ui->borrowerTable->horizontalHeader()->setStretchLastSection(true);
 
     connect(ui->searchBorrower, &QLineEdit::textChanged, this, &LoansWidgets::filterBorrowers);
-
-    connect(ui->borrowerTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]() {
+    connect(ui->borrowerTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](){
         QModelIndex index = ui->borrowerTable->currentIndex();
         if (!index.isValid()) return;
         QModelIndex src = borrowerProxy->mapToSource(index);
@@ -69,8 +68,7 @@ LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     ui->guarantorTable->horizontalHeader()->setStretchLastSection(true);
 
     connect(ui->searchGuarantor, &QLineEdit::textChanged, this, &LoansWidgets::filterGuarantors);
-
-    connect(ui->guarantorTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]() {
+    connect(ui->guarantorTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](){
         selectedGuarantorIds.clear();
         QStringList names;
         for (const QModelIndex &index : ui->guarantorTable->selectionModel()->selectedRows()) {
@@ -92,7 +90,6 @@ LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     ui->loanTable->horizontalHeader()->setStretchLastSection(true);
 
     connect(ui->searchLoan, &QLineEdit::textChanged, this, &LoansWidgets::filterLoans);
-
     connect(ui->addLoanButton, &QPushButton::clicked, this, &LoansWidgets::addLoan);
 
     loadLoans();
@@ -117,7 +114,6 @@ void LoansWidgets::loadLoans() {
 
     loanModel->setQuery(queryStr, db);
 
-    // Persian headers
     loanModel->setHeaderData(1, Qt::Horizontal, "وام‌گیرنده");
     loanModel->setHeaderData(2, Qt::Horizontal, "ضامن‌ها");
     loanModel->setHeaderData(3, Qt::Horizontal, "مبلغ");
@@ -154,40 +150,28 @@ void LoansWidgets::addLoan() {
         return;
     }
 
-    // ---------------- Get last inserted loan ID (SQLite-safe) ----------------
+    // Get last inserted loan ID (SQLite-safe)
     QSqlQuery getId(db);
     if (!getId.exec("SELECT last_insert_rowid()")) {
         QMessageBox::critical(this, "خطا", getId.lastError().text());
         return;
     }
     int loanId = 0;
-    if (getId.next()) {
-        loanId = getId.value(0).toInt();
-    }
+    if (getId.next()) loanId = getId.value(0).toInt();
 
-    // ---------------- Insert multiple guarantors safely ----------------
+    // Insert multiple guarantors
     QSqlQuery g(db);
     g.prepare("INSERT INTO loan_guarantors (loan_id, person_id) VALUES (?, ?)");
     for (int id : selectedGuarantorIds) {
-        g.bindValue(0, loanId); // loan_id
-        g.bindValue(1, id);     // guarantor_id
-        if (!g.exec()) {
-            qDebug() << "Failed to insert guarantor:" << g.lastError().text();
-        }
+        g.bindValue(0, loanId);
+        g.bindValue(1, id);
+        if (!g.exec()) qDebug() << "Failed to insert guarantor:" << g.lastError().text();
     }
 
     loadLoans(); // refresh loan table
 }
 
 // ---------------- Filter Functions ----------------
-void LoansWidgets::filterBorrowers(const QString &text) {
-    borrowerProxy->setFilterWildcard("*" + text + "*");
-}
-
-void LoansWidgets::filterGuarantors(const QString &text) {
-    guarantorProxy->setFilterWildcard("*" + text + "*");
-}
-
-void LoansWidgets::filterLoans(const QString &text) {
-    loanProxy->setFilterWildcard("*" + text + "*");
-}
+void LoansWidgets::filterBorrowers(const QString &text) { borrowerProxy->setFilterWildcard("*" + text + "*"); }
+void LoansWidgets::filterGuarantors(const QString &text) { guarantorProxy->setFilterWildcard("*" + text + "*"); }
+void LoansWidgets::filterLoans(const QString &text) { loanProxy->setFilterWildcard("*" + text + "*"); }
