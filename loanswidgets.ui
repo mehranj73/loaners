@@ -6,27 +6,150 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>722</height>
+    <width>950</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>LoansWidgets</string>
+   <string>مدیریت وام‌ها</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QLineEdit" name="lineEdit"/>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>PushButton</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTableWidget" name="tableWidget"/>
-   </item>
+  <layout class="QVBoxLayout" name="mainLayout">
+   
+    <!-- Borrower Section -->
+    <item>
+      <widget class="QGroupBox" name="borrowerGroup">
+        <property name="title">
+          <string>وام‌گیرنده</string>
+        </property>
+        <layout class="QVBoxLayout">
+          <item>
+            <widget class="QLineEdit" name="searchBorrower">
+              <property name="placeholderText">
+                <string>جستجوی وام‌گیرنده...</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QTableView" name="borrowerTable"/>
+          </item>
+          <item>
+            <widget class="QLabel" name="borrowerSelectedLabel">
+              <property name="text">
+                <string>وام‌گیرنده انتخاب‌شده: -</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </widget>
+    </item>
+
+    <!-- Guarantor Section -->
+    <item>
+      <widget class="QGroupBox" name="guarantorGroup">
+        <property name="title">
+          <string>ضامن</string>
+        </property>
+        <layout class="QVBoxLayout">
+          <item>
+            <widget class="QLineEdit" name="searchGuarantor">
+              <property name="placeholderText">
+                <string>جستجوی ضامن...</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QTableView" name="guarantorTable"/>
+          </item>
+          <item>
+            <widget class="QLabel" name="guarantorSelectedLabel">
+              <property name="text">
+                <string>ضامن انتخاب‌شده: -</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </widget>
+    </item>
+
+    <!-- Loan Section -->
+    <item>
+      <widget class="QGroupBox" name="loanGroup">
+        <property name="title">
+          <string>وام‌ها</string>
+        </property>
+        <layout class="QVBoxLayout">
+
+          <item>
+            <widget class="QTableView" name="loanTable"/>
+          </item>
+
+          <item>
+            <layout class="QFormLayout" name="loanForm">
+              <item row="0" column="0">
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>مبلغ:</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="0" column="1">
+                <widget class="QLineEdit" name="amountEdit"/>
+              </item>
+
+              <item row="1" column="0">
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>درصد سود:</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="1" column="1">
+                <widget class="QLineEdit" name="percentEdit"/>
+              </item>
+
+              <item row="2" column="0">
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>توضیحات:</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="2" column="1">
+                <widget class="QLineEdit" name="descEdit"/>
+              </item>
+
+              <item row="3" column="0">
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>تاریخ:</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="3" column="1">
+                <widget class="QDateEdit" name="dateEdit">
+                  <property name="calendarPopup">
+                    <bool>true</bool>
+                  </property>
+                  <property name="displayFormat">
+                    <string>yyyy-MM-dd</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+
+          <item>
+            <widget class="QPushButton" name="addLoanButton">
+              <property name="text">
+                <string>➕ افزودن وام</string>
+              </property>
+            </widget>
+          </item>
+
+        </layout>
+      </widget>
+    </item>
+
   </layout>
  </widget>
  <resources/>
