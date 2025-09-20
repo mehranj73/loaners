@@ -6,7 +6,6 @@
 #include <QSqlTableModel>
 #include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
-#include <QVector>
 
 namespace Ui {
     class LoansWidgets;
@@ -21,27 +20,38 @@ public:
     ~LoansWidgets();
 
 private slots:
+    void filterBorrowers(const QString &text) {
+    borrowerProxy->setFilterFixedString(text);
+}
+    void filterGuarantors(const QString &text) {
+    guarantorProxy->setFilterFixedString(text);
+}
+    void filterLoans(const QString &text) {
+    loanProxy->setFilterFixedString(text);
+}
+    void borrowerSelected(const QModelIndex &index);
+    void guarantorSelectionChanged();
     void addLoan();
-    void filterBorrowers(const QString &text);
-    void filterGuarantors(const QString &text);
-    void filterLoans(const QString &text);
+    void onLoanSelected();
 
 private:
+    void setupModels();
     void loadLoans();
 
     Ui::LoansWidgets *ui;
     QSqlDatabase db;
 
     QSqlTableModel *borrowerModel;
-    QSqlTableModel *guarantorModel;
     QSortFilterProxyModel *borrowerProxy;
+
+    QSqlTableModel *guarantorModel;
     QSortFilterProxyModel *guarantorProxy;
 
     QSqlQueryModel *loanModel;
     QSortFilterProxyModel *loanProxy;
 
     int selectedBorrowerId;
-    QVector<int> selectedGuarantorIds;
+    QList<int> selectedGuarantorIds;
 };
 
 #endif // LOANSWIDGETS_H

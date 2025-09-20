@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QHeaderView>
+#include <QItemSelectionModel>
+#include <QDate>
 
 LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     QWidget(parent),
@@ -19,78 +21,35 @@ LoansWidgets::LoansWidgets(QWidget *parent, const QString &connectionName) :
     selectedBorrowerId(-1)
 {
     ui->setupUi(this);
-    this->setLayoutDirection(Qt::RightToLeft);
 
-    // Database connection
-    if (!connectionName.isEmpty() && QSqlDatabase::contains(connectionName))
+    if (connectionName.isEmpty()) {
+        db = QSqlDatabase::database(); // default connection
+    } else {
         db = QSqlDatabase::database(connectionName);
-    else
-        db = QSqlDatabase::database();
+    }
 
-    // ---------------- Borrowers ----------------
-    borrowerModel = new QSqlTableModel(this, db);
-    borrowerModel->setTable("persons");
-    borrowerModel->select();
+    if (!db.isValid() || !db.isOpen()) {
+        QMessageBox::critical(this, "Database error", "Database is not open. Please open the database before creating this widget.");
+        return;
+    }
 
-    borrowerProxy = new QSortFilterProxyModel(this);
-    borrowerProxy->setSourceModel(borrowerModel);
-    borrowerProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    borrowerProxy->setFilterKeyColumn(1);
+    setupModels();
 
-    ui->borrowerTable->setModel(borrowerProxy);
-    ui->borrowerTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->borrowerTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->borrowerTable->horizontalHeader()->setStretchLastSection(true);
-
+    // Connect search fields
     connect(ui->searchBorrower, &QLineEdit::textChanged, this, &LoansWidgets::filterBorrowers);
-    connect(ui->borrowerTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](){
-        QModelIndex index = ui->borrowerTable->currentIndex();
-        if (!index.isValid()) return;
-        QModelIndex src = borrowerProxy->mapToSource(index);
-        selectedBorrowerId = borrowerModel->data(borrowerModel->index(src.row(), 0)).toInt();
-        QString name = borrowerModel->data(borrowerModel->index(src.row(), 1)).toString();
-        ui->borrowerSelectedLabel->setText(QStringLiteral("وام‌گیرنده انتخاب‌شده: ") + name);
-    });
-
-    // ---------------- Guarantors ----------------
-    guarantorModel = new QSqlTableModel(this, db);
-    guarantorModel->setTable("persons");
-    guarantorModel->select();
-
-    guarantorProxy = new QSortFilterProxyModel(this);
-    guarantorProxy->setSourceModel(guarantorModel);
-    guarantorProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    guarantorProxy->setFilterKeyColumn(1);
-
-    ui->guarantorTable->setModel(guarantorProxy);
-    ui->guarantorTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->guarantorTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->guarantorTable->horizontalHeader()->setStretchLastSection(true);
-
     connect(ui->searchGuarantor, &QLineEdit::textChanged, this, &LoansWidgets::filterGuarantors);
-    connect(ui->guarantorTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](){
-        selectedGuarantorIds.clear();
-        QStringList names;
-        for (const QModelIndex &index : ui->guarantorTable->selectionModel()->selectedRows()) {
-            QModelIndex src = guarantorProxy->mapToSource(index);
-            int id = guarantorModel->data(guarantorModel->index(src.row(), 0)).toInt();
-            selectedGuarantorIds.append(id);
-            QString name = guarantorModel->data(guarantorModel->index(src.row(), 1)).toString();
-            names.append(name);
-        }
-        ui->guarantorSelectedLabel->setText(QStringLiteral("ضامن‌های انتخاب‌شده: ") + names.join(", "));
-    });
-
-    // ---------------- Loans ----------------
-    loanModel = new QSqlQueryModel(this);
-    loanProxy = new QSortFilterProxyModel(this);
-    loanProxy->setSourceModel(loanModel);
-    loanProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    ui->loanTable->setModel(loanProxy);
-    ui->loanTable->horizontalHeader()->setStretchLastSection(true);
-
     connect(ui->searchLoan, &QLineEdit::textChanged, this, &LoansWidgets::filterLoans);
+
+    // Add loan
     connect(ui->addLoanButton, &QPushButton::clicked, this, &LoansWidgets::addLoan);
+
+    // Borrower selection
+    connect(ui->borrowerTable->selectionModel(), &QItemSelectionModel::currentRowChanged,
+            this, &LoansWidgets::borrowerSelected);
+
+    // Guarantor selection (multi)
+    connect(ui->guarantorTable->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &LoansWidgets::guarantorSelectionChanged);
 
     loadLoans();
 }
@@ -99,46 +58,109 @@ LoansWidgets::~LoansWidgets() {
     delete ui;
 }
 
-// ---------------- Load Loans ----------------
-void LoansWidgets::loadLoans() {
-    QString queryStr =
-        "SELECT l.id, p.name AS borrower, "
-        "IFNULL(GROUP_CONCAT(gp.name, ', '), '') AS guarantors, "
-        "l.amount, l.percentage, l.description, l.date "
-        "FROM loans l "
-        "JOIN persons p ON l.borrower_id = p.id "
-        "LEFT JOIN loan_guarantors lg ON l.id = lg.loan_id "
-        "LEFT JOIN persons gp ON lg.person_id = gp.id "
-        "GROUP BY l.id "
-        "ORDER BY l.id DESC;";
+void LoansWidgets::setupModels()
+{
+    // Borrowers
+    borrowerModel = new QSqlTableModel(this, db);
+    borrowerModel->setTable("persons");
+    borrowerModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    borrowerModel->select();
 
-    loanModel->setQuery(queryStr, db);
+    borrowerProxy = new QSortFilterProxyModel(this);
+    borrowerProxy->setSourceModel(borrowerModel);
+    borrowerProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    loanModel->setHeaderData(1, Qt::Horizontal, "وام‌گیرنده");
-    loanModel->setHeaderData(2, Qt::Horizontal, "ضامن‌ها");
-    loanModel->setHeaderData(3, Qt::Horizontal, "مبلغ");
-    loanModel->setHeaderData(4, Qt::Horizontal, "درصد سود");
-    loanModel->setHeaderData(5, Qt::Horizontal, "توضیحات");
-    loanModel->setHeaderData(6, Qt::Horizontal, "تاریخ");
+    ui->borrowerTable->setModel(borrowerProxy);
+    ui->borrowerTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->borrowerTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->borrowerTable->horizontalHeader()->setStretchLastSection(true);
 
-    ui->loanTable->hideColumn(0); // hide loan ID
+    // Guarantors
+    guarantorModel = new QSqlTableModel(this, db);
+    guarantorModel->setTable("persons");
+    guarantorModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    guarantorModel->select();
+
+    guarantorProxy = new QSortFilterProxyModel(this);
+    guarantorProxy->setSourceModel(guarantorModel);
+    guarantorProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->guarantorTable->setModel(guarantorProxy);
+    ui->guarantorTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->guarantorTable->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->guarantorTable->horizontalHeader()->setStretchLastSection(true);
+
+    // Loans
+    loanModel = new QSqlQueryModel(this);
+    loanProxy = new QSortFilterProxyModel(this);
+    loanProxy->setSourceModel(loanModel);
+    loanProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->loanTable->setModel(loanProxy);
+    ui->loanTable->horizontalHeader()->setStretchLastSection(true);
 }
 
-// ---------------- Add Loan ----------------
-void LoansWidgets::addLoan() {
+void LoansWidgets::loadLoans()
+{
+    QString q = QStringLiteral(
+        "SELECT l.id, p.name AS borrower, l.amount, l.percentage, l.description, l.date "
+        "FROM loans l "
+        "LEFT JOIN persons p ON p.id = l.borrower_id "
+        "ORDER BY l.date DESC"
+    );
+    loanModel->setQuery(q, db);
+    if (loanModel->lastError().isValid()) {
+        qDebug() << "Failed to load loans:" << loanModel->lastError().text();
+    }
+}
+
+void LoansWidgets::borrowerSelected(const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        selectedBorrowerId = -1;
+        return;
+    }
+    QModelIndex source = borrowerProxy->mapToSource(index);
+    QVariant id = borrowerModel->data(borrowerModel->index(source.row(), 0));
+    selectedBorrowerId = id.isValid() ? id.toInt() : -1;
+}
+
+void LoansWidgets::guarantorSelectionChanged()
+{
+    selectedGuarantorIds.clear();
+    QItemSelectionModel *sel = ui->guarantorTable->selectionModel();
+    QModelIndexList indexes = sel->selectedRows();
+    for (const QModelIndex &proxyIndex : indexes) {
+        QModelIndex sourceIndex = guarantorProxy->mapToSource(proxyIndex);
+        QVariant id = guarantorModel->data(guarantorModel->index(sourceIndex.row(), 0));
+        if (id.isValid()) selectedGuarantorIds.append(id.toInt());
+    }
+}
+
+void LoansWidgets::addLoan()
+{
     if (selectedBorrowerId < 0) {
         QMessageBox::warning(this, "خطا", "لطفا وام‌گیرنده را انتخاب کنید.");
         return;
     }
 
-    double amount = ui->amountEdit->text().toDouble();
-    double percent = ui->percentEdit->text().toDouble();
-    QString desc = ui->descEdit->text();
+    bool okA=false, okP=false;
+    double amount = ui->amountEdit->text().toDouble(&okA);
+    double percent = ui->percentEdit->text().toDouble(&okP);
+    QString desc = ui->descEdit->text().trimmed();
     QString date = ui->dateEdit->date().toString("yyyy-MM-dd");
+
+    if (!okA || amount <= 0.0) {
+        QMessageBox::warning(this, "خطا", "مبلغ نامعتبر است.");
+        return;
+    }
 
     // Insert loan
     QSqlQuery q(db);
-    q.prepare("INSERT INTO loans (borrower_id, amount, percentage, description, date) VALUES (?, ?, ?, ?, ?)");
+    q.prepare(R"(
+        INSERT INTO loans (borrower_id, amount, percentage, description, date)
+        VALUES (?, ?, ?, ?, ?)
+    )");
     q.addBindValue(selectedBorrowerId);
     q.addBindValue(amount);
     q.addBindValue(percent);
@@ -146,32 +168,89 @@ void LoansWidgets::addLoan() {
     q.addBindValue(date);
 
     if (!q.exec()) {
-        QMessageBox::critical(this, "خطا", q.lastError().text());
+        QMessageBox::critical(this, "خطا هنگام درج وام", q.lastError().text());
         return;
     }
 
-    // Get last inserted loan ID (SQLite-safe)
-    QSqlQuery getId(db);
-    if (!getId.exec("SELECT last_insert_rowid()")) {
-        QMessageBox::critical(this, "خطا", getId.lastError().text());
-        return;
-    }
     int loanId = 0;
-    if (getId.next()) loanId = getId.value(0).toInt();
-
-    // Insert multiple guarantors
-    QSqlQuery g(db);
-    g.prepare("INSERT INTO loan_guarantors (loan_id, person_id) VALUES (?, ?)");
-    for (int id : selectedGuarantorIds) {
-        g.bindValue(0, loanId);
-        g.bindValue(1, id);
-        if (!g.exec()) qDebug() << "Failed to insert guarantor:" << g.lastError().text();
+    QVariant lastId = q.lastInsertId();
+    if (lastId.isValid()) {
+        loanId = lastId.toInt();
+    } else {
+        QSqlQuery getId(db);
+        if (db.driverName().toLower().contains("sqlite")) {
+            if (getId.exec("SELECT last_insert_rowid()") && getId.next())
+                loanId = getId.value(0).toInt();
+        }
     }
 
-    loadLoans(); // refresh loan table
+    if (loanId > 0) {
+        QSqlQuery g(db);
+        g.prepare("INSERT INTO loan_guarantors (loan_id, person_id) VALUES (?, ?)");
+        for (int pid : selectedGuarantorIds) {
+            g.addBindValue(loanId);
+            g.addBindValue(pid);
+            if (!g.exec()) {
+                qDebug() << "Failed to insert guarantor:" << g.lastError().text();
+            }
+        }
+    }
+
+    loadLoans();
+
+    ui->amountEdit->clear();
+    ui->percentEdit->clear();
+    ui->descEdit->clear();
+    ui->dateEdit->setDate(QDate::currentDate());
+    ui->borrowerTable->clearSelection();
+    ui->guarantorTable->clearSelection();
+    selectedBorrowerId = -1;
+    selectedGuarantorIds.clear();
 }
 
-// ---------------- Filter Functions ----------------
-void LoansWidgets::filterBorrowers(const QString &text) { borrowerProxy->setFilterWildcard("*" + text + "*"); }
-void LoansWidgets::filterGuarantors(const QString &text) { guarantorProxy->setFilterWildcard("*" + text + "*"); }
-void LoansWidgets::filterLoans(const QString &text) { loanProxy->setFilterWildcard("*" + text + "*"); }
+void LoansWidgets::onLoanSelected()
+{
+    QModelIndex idx = ui->loanTable->currentIndex();
+    if (!idx.isValid()) return;
+
+    int row = loanProxy->mapToSource(idx).row();
+    int loanId = loanModel->data(loanModel->index(row, 0)).toInt();
+
+    QSqlQuery q(db);
+    q.prepare(R"(
+        SELECT l.id, l.amount, l.percentage, l.description, l.date,
+               b.name as borrower
+        FROM loans l
+        LEFT JOIN persons b ON b.id = l.borrower_id
+        WHERE l.id = ?
+    )");
+    q.addBindValue(loanId);
+
+    QString details;
+    if (q.exec() && q.next()) {
+        details += QString("شناسه وام: %1\n").arg(q.value("id").toInt());
+        details += QString("وام‌گیرنده: %1\n").arg(q.value("borrower").toString());
+        details += QString("مبلغ: %1\n").arg(q.value("amount").toDouble());
+        details += QString("درصد سود: %1%%\n").arg(q.value("percentage").toDouble());
+        details += QString("تاریخ: %1\n").arg(q.value("date").toString());
+        details += QString("توضیحات: %1\n").arg(q.value("description").toString());
+    }
+
+    QSqlQuery g(db);
+    g.prepare(R"(
+        SELECT p.name
+        FROM loan_guarantors lg
+        JOIN persons p ON p.id = lg.person_id
+        WHERE lg.loan_id = ?
+    )");
+    g.addBindValue(loanId);
+
+    QStringList guarantors;
+    if (g.exec()) {
+        while (g.next()) guarantors << g.value(0).toString();
+    }
+
+    details += "\nضامن‌ها: " + (guarantors.isEmpty() ? "هیچ‌کدام" : guarantors.join(", "));
+
+  //  ui->textLoanDetails->setPlainText(details);
+}
